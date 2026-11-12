@@ -1,0 +1,35 @@
+게임룰은 크게 2가지로 나눠집니다
+
+1. 클리어 인정 조건
+제작자와의 신뢰를 바탕으로 작동하는 게임 룰입니다.
+게임 내에선 적용되지 않지만 게임 룰에 따라 제작자(또는 커뮤니티 전체)의 클리어 인증을 받거나 마는 식으로 작동합니다.
+해당 범주 내에 속한 게임 룰은 아래과 같습니다.
+————————————————————————
+- 2키 플레이 요구 (gamerule_2k)
+- 4키 플레이 요구 (gamerule_4k)
+- 6키 플레이 요구 (gamerule_6k)
+- 8키 플레이 요구 (gamerule_8k)
+- 10키 플레이 요구 (gamerule_10k)
+- 손 캠 인증 필요 (gamerule_FurtherVerificationNeeded)
+- 손 변경 허가 (gamerule_handchangeallow)
+- 손 변경 금지 (gamerule_handchangenotallow)
+- 키 개수 제한 변경 사용됨 (gamerule_keylimitchange)
+- 중첩 키 사용 금지 (gamerule_noduplicatekey)
+————————————————————————
+
+2. 기믹 표기
+게임 내에 실제로 적용되어 있는 기믹을 표기하는 게임 룰입니다
+해당 범주 내에 속한 게임 룰은 아래와 같습니다
+————————————————————————
+- 손 지정 타일 사용됨 (gamerule_handslimit)
+- 체력 기믹 사용됨 (gamerule_healthgimmick)
+- 판정 타이밍 범위 변경 사용됨 (gamerule_judchange)
+- 판정 제한 사용됨 (gamerule_judlimit)
+- 암기 요소 존재 (gamerule_memorizetion)
+- 노미스 플레이 요구 (gamerule_nomiss)
+- 완벽주의 플레이 요구 (gamerule_onlyperfect
+- 완벽한 플레이 요구 (gamerule_onlypureperfect)
+- 설명이 필요한 기믹 사용됨 (gamerule_specialgimmick)
+- 양손 동타 사용됨 (gamerule_superpseudo)
+- 화살표 키 사용됨 (gamerule_usearrowkey)
+————————————————————————
