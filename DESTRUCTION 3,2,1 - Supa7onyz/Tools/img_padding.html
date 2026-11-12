@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>图片画布填充工具 - 内边距/外边距/背景色</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* 主布局：左右两栏，左窄右宽适应设置面板与预览 */
+        .app-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        
+        /* --- 左侧控制面板 (现代卡片风格) --- */
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+            transition: all 0.2s;
+        }
+        
+        .panel-header {
+            background: #1e1f22;
+            color: white;
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel-header span {
+            background: #3a6ea5;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: normal;
+            margin-left: auto;
+        }
+        
+        .upload-area {
+            padding: 20px 20px 0 20px;
+        }
+        
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 18px;
+            padding: 24px 12px;
+            text-align: center;
+            background: #fafcff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+        
+        .upload-box:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: scale(0.99);
+        }
+        
+        .upload-box.dragover {
+            border-color: #2563eb;
+            background: #dbeafe;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+        
+        .upload-icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+        
+        .settings-area {
+            padding: 20px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        
+        /* 自定义滚动条 */
+        .settings-area::-webkit-scrollbar {
+            width: 5px;
+        }
+        .settings-area::-webkit-scrollbar-track {
+            background: #e9eef3;
+            border-radius: 8px;
+        }
+        .settings-area::-webkit-scrollbar-thumb {
+            background: #b9c3d0;
+            border-radius: 8px;
+        }
+        
+        .card-section {
+            background: #ffffff;
+            border: 1px solid #eef2f8;
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            transition: box-shadow 0.1s;
+        }
+        
+        .card-section h4 {
+            margin: 0 0 15px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 3px solid #3b82f6;
+            padding-left: 12px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .setting-row label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            min-width: 85px;
+        }
+        
+        .setting-row input, .setting-row select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            background: white;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        
+        .setting-row input:focus, .setting-row select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+        
+        .setting-row input[type="color"] {
+            width: 48px;
+            padding: 3px;
+            min-width: 48px;
+            height: 38px;
+            cursor: pointer;
+        }
+        
+        .inline-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .inline-range input {
+            flex: 1;
+        }
+        
+        .inline-range span {
+            font-size: 0.8rem;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 20px;
+            min-width: 45px;
+            text-align: center;
+        }
+        
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        
+        .checkbox-row input {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .checkbox-row label {
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        hr {
+            margin: 16px 0;
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #e2e8f0, transparent);
+        }
+        
+        /* 右侧预览区 */
+        .preview-panel {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: calc(100vh - 40px);
+            position: relative;
+        }
+        
+        .preview-header {
+            background: #ffffff;
+            border-bottom: 1px solid #edf2f7;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .preview-header h3 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+            background: linear-gradient(135deg, #1e293b, #2c3e66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #eef2ff;
+            color: #1e40af;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e7ff;
+        }
+        
+        .preview-canvas-area {
+            flex: 1;
+            background: #eef2f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .canvas-wrapper {
+            background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 20px 20px;
+            border-radius: 16px;
+            padding: 8px;
+            display: inline-flex;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        #resultCanvas {
+            display: block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .info-bar {
+            padding: 14px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #eef2f8;
+            font-size: 0.8rem;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            background: #e6f0ff;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        
+        @media (max-width: 780px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .control-panel {
+                position: static;
+            }
+            .preview-panel {
+                height: auto;
+                min-height: 500px;
+            }
+            .setting-row {
+                flex-wrap: wrap;
+            }
+        }
+        
+        button:active {
+            transform: scale(0.97);
+        }
+        
+        .dimension-badge {
+            font-family: monospace;
+            background: #eef2ff;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- 左侧控制区 -->
+    <div class="control-panel">
+        <div class="panel-header">
+            🖌️ 图片填充工具
+            <span>padding + margin</span>
+        </div>
+        
+        <div class="upload-area">
+            <div id="uploadBox" class="upload-box">
+                <div class="upload-icon">🖼️➕📏</div>
+                <div>点击或拖拽图片至此</div>
+                <small style="color: #6c757d;">支持 PNG / JPG / WEBP / GIF</small>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="settings-area">
+            <!-- 内边距 (Padding) 区域 -->
+            <div class="card-section">
+                <h4>📦 内边距 (Padding)  <span style="font-size:11px; background:#eef2ff; padding:2px 8px; border-radius:30px;">图片四周内部扩展</span></h4>
+                <div class="setting-row">
+                    <label>上边距 (Top):</label>
+                    <input type="number" id="paddingTop" value="20" min="0" max="500" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>右边距 (Right):</label>
+                    <input type="number" id="paddingRight" value="20" min="0" max="500" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>下边距 (Bottom):</label>
+                    <input type="number" id="paddingBottom" value="20" min="0" max="500" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>左边距 (Left):</label>
+                    <input type="number" id="paddingLeft" value="20" min="0" max="500" step="1">
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="linkPadding">
+                    <label>🔗 统一所有内边距 (同步调整)</label>
+                </div>
+            </div>
+            
+            <!-- 外边距 (Margin) 背景扩展区 (相当于图片外围背景区域，通常指背景边界离图片整体的间距) 在视觉上相当于画布外扩背景-->
+            <div class="card-section">
+                <h4>🖼️ 外边距 (Margin) 背景扩展</h4>
+                <div class="setting-row">
+                    <label>上边距 (Top):</label>
+                    <input type="number" id="marginTop" value="10" min="0" max="500" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>右边距 (Right):</label>
+                    <input type="number" id="marginRight" value="10" min="0" max="500" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>下边距 (Bottom):</label>
+                    <input type="number" id="marginBottom" value="10" min="0" max="500" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>左边距 (Left):</label>
+                    <input type="number" id="marginLeft" value="10" min="0" max="500" step="1">
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="linkMargin">
+                    <label>🔗 统一所有外边距 (同步调整)</label>
+                </div>
+            </div>
+            
+            <!-- 背景颜色与圆角 -->
+            <div class="card-section">
+                <h4>🎨 背景样式</h4>
+                <div class="setting-row">
+                    <label>背景颜色:</label>
+                    <input type="color" id="bgColor" value="#f8fafc">
+                    <span style="font-size:12px; color:#4b5563;">填充区域颜色</span>
+                </div>
+	<div class="checkbox-row">
+	    <input type="checkbox" id="transparentBg">
+	    <label>✨ 透明背景 (PNG格式保留透明通道)</label>
+	</div>
+                <div class="setting-row">
+                    <label>圆角 (Radius):</label>
+                    <input type="number" id="cornerRadius" value="12" min="0" max="80" step="1">
+                    <span style="font-size:12px;">px</span>
+                </div>
+                <div class="setting-row">
+                    <label>阴影效果:</label>
+                    <select id="shadowEffect">
+                        <option value="none">无阴影</option>
+                        <option value="soft" selected>柔和阴影</option>
+                        <option value="strong">强阴影</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 其他选项 画布缩放/质量 -->
+            <div class="card-section">
+                <h4>⚙️ 输出设置</h4>
+                <div class="setting-row">
+                    <label>图片缩放模式:</label>
+                    <select id="scaleMode">
+                        <option value="none">保持原始尺寸 (推荐)</option>
+                        <option value="fitWidth">自适应宽度(不超过预览)</option>
+                    </select>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="preserveRatio" checked>
+                    <label>保持图片宽高比 (仅在强制缩放时推荐，本工具默认不压缩原图)</label>
+                </div>
+                <div style="margin-top: 12px; font-size: 12px; color:#5b6e8c;">
+                    💡 提示：内边距在图片周围扩充背景，外边距在更外层扩充背景。最终生成带背景的新画布。
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 右侧预览及操作 -->
+    <div class="preview-panel">
+        <div class="preview-header">
+            <h3>✨ 实时预览效果</h3>
+            <div class="action-buttons">
+                <button id="refreshPreviewBtn" class="btn btn-secondary">🔄 刷新预览</button>
+                <button id="downloadBtn" class="btn btn-primary">⬇️ 保存为 PNG</button>
+                <button id="copyClipboardBtn" class="btn btn-secondary">📋 复制图片</button>
+            </div>
+        </div>
+        
+        <div class="preview-canvas-area" id="previewArea">
+            <div class="canvas-wrapper">
+                <canvas id="resultCanvas" style="display: block; max-width: 100%; height: auto;"></canvas>
+            </div>
+        </div>
+        
+        <div class="info-bar">
+            <div class="progress-indicator">
+                <span class="status-badge" id="statusLabel">⚡ 就绪</span>
+                <span id="imageDimensions" class="dimension-badge">未加载图片</span>
+            </div>
+            <div id="infoMessage" style="font-size:12px;">👆 点击或拖拽上传图片，调整内/外边距生成新背景</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- DOM 元素绑定 ----------
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const resultCanvas = document.getElementById('resultCanvas');
+    const refreshBtn = document.getElementById('refreshPreviewBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyClipboardBtn');
+    const statusSpan = document.getElementById('statusLabel');
+    const dimensionSpan = document.getElementById('imageDimensions');
+    
+    // Padding 控件
+    const paddingTop = document.getElementById('paddingTop');
+    const paddingRight = document.getElementById('paddingRight');
+    const paddingBottom = document.getElementById('paddingBottom');
+    const paddingLeft = document.getElementById('paddingLeft');
+    const linkPadding = document.getElementById('linkPadding');
+    
+    // Margin 控件
+    const marginTop = document.getElementById('marginTop');
+    const marginRight = document.getElementById('marginRight');
+    const marginBottom = document.getElementById('marginBottom');
+    const marginLeft = document.getElementById('marginLeft');
+    const linkMargin = document.getElementById('linkMargin');
+    
+    // 样式控件
+    const bgColor = document.getElementById('bgColor');
+    const transparentBg = document.getElementById('transparentBg');
+    const cornerRadius = document.getElementById('cornerRadius');
+    const shadowEffect = document.getElementById('shadowEffect');
+    const scaleMode = document.getElementById('scaleMode');
+    const preserveRatio = document.getElementById('preserveRatio');  // 保留备用，但本工具不会缩放原图，只增减画布
+    
+    // 全局图片源数据
+    let originalImageObj = null;      // HTMLImageElement
+    let imgWidth = 0, imgHeight = 0;
+    let imageLoaded = false;
+    
+    // 辅助: 联动padding统一
+    function setupLinkInputs(linkCheckbox, ...inputs) {
+        let syncing = false;
+        const updateAll = (value) => {
+            if (syncing) return;
+            syncing = true;
+            inputs.forEach(input => { input.value = value; });
+            syncing = false;
+            updatePreviewDebounced();
+        };
+        linkCheckbox.addEventListener('change', () => {
+            if (linkCheckbox.checked && inputs[0]) {
+                const firstVal = inputs[0].value;
+                updateAll(firstVal);
+            }
+        });
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                if (linkCheckbox.checked) {
+                    updateAll(input.value);
+                } else {
+                    updatePreviewDebounced();
+                }
+            });
+            input.addEventListener('change', () => updatePreviewDebounced());
+        });
+    }
+    
+    // 设置padding联动
+    setupLinkInputs(linkPadding, paddingTop, paddingRight, paddingBottom, paddingLeft);
+    setupLinkInputs(linkMargin, marginTop, marginRight, marginBottom, marginLeft);
+    
+    // 防抖刷新预览
+    let debounceTimer;
+    function updatePreviewDebounced() {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (imageLoaded && originalImageObj) {
+                renderFinalImage();
+            }
+        }, 40);
+    }
+    
+    // 监听所有相关控件的变更并刷新
+    const allControlEvents = [paddingTop, paddingRight, paddingBottom, paddingLeft, marginTop, marginRight, marginBottom, marginLeft, bgColor, cornerRadius, shadowEffect, scaleMode];
+    allControlEvents.forEach(ctrl => {
+        ctrl.addEventListener('input', () => updatePreviewDebounced());
+        ctrl.addEventListener('change', () => updatePreviewDebounced());
+    });
+    refreshBtn.addEventListener('click', () => {
+        if (imageLoaded) renderFinalImage();
+        else statusSpan.innerText = '⚠️ 无图片';
+    });
+    
+    // 上传图片逻辑
+    uploadBox.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) loadImageFile(e.target.files[0]);
+    });
+    
+    // 拖拽上传
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('dragover');
+    });
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            loadImageFile(e.dataTransfer.files[0]);
+        }
+    });
+    
+    function loadImageFile(file) {
+        if (!file.type.startsWith('image/')) {
+            statusSpan.innerText = '❌ 文件类型错误';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+                originalImageObj = img;
+                imgWidth = img.width;
+                imgHeight = img.height;
+                imageLoaded = true;
+                dimensionSpan.innerText = `${imgWidth} x ${imgHeight}`;
+                statusSpan.innerText = '✅ 已加载';
+                renderFinalImage();
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // 示例初始化默认图片 (优雅的渐变色展示)
+    function initDefaultPlaceholder() {
+        const canvas = document.createElement('canvas');
+        const w = 580, h = 360;
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        // 渐变色背景增加趣味
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, '#c7e9fb');
+        grad.addColorStop(1, '#d0f0fd');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#2c3e66';
+        ctx.font = `500 26px 'Segoe UI', system-ui`;
+        ctx.textAlign = 'center';
+        ctx.fillText('📸 示例图片', w/2, h/2 - 20);
+        ctx.font = '16px system-ui';
+        ctx.fillStyle = '#1f4a6e';
+        ctx.fillText('上传您的图片，调节四周 padding & margin', w/2, h/2 + 35);
+        ctx.fillStyle = '#306c9f';
+        ctx.fillRect(w/2-85, h-55, 170, 3);
+        
+        const img = new Image();
+        img.onload = () => {
+            originalImageObj = img;
+            imgWidth = img.width;
+            imgHeight = img.height;
+            imageLoaded = true;
+            dimensionSpan.innerText = `${imgWidth} x ${imgHeight}`;
+            statusSpan.innerText = '🖌️ 默认示例';
+            renderFinalImage();
+        };
+        img.src = canvas.toDataURL();
+    }
+    
+    // 核心渲染：根据 padding, margin, 背景色，圆角等生成带边距的最终图片
+    async function renderFinalImage() {
+        if (!originalImageObj || !imageLoaded) return;
+        
+        // 获取各个数值 (整数)
+        let pT = Math.max(0, parseInt(paddingTop.value) || 0);
+        let pR = Math.max(0, parseInt(paddingRight.value) || 0);
+        let pB = Math.max(0, parseInt(paddingBottom.value) || 0);
+        let pL = Math.max(0, parseInt(paddingLeft.value) || 0);
+        
+        let mT = Math.max(0, parseInt(marginTop.value) || 0);
+        let mR = Math.max(0, parseInt(marginRight.value) || 0);
+        let mB = Math.max(0, parseInt(marginBottom.value) || 0);
+        let mL = Math.max(0, parseInt(marginLeft.value) || 0);
+        
+        const bgColorValue = bgColor.value;
+        const radius = Math.min(parseInt(cornerRadius.value) || 0, 120);
+        const shadowType = shadowEffect.value;
+        
+        // 计算内层带padding之后的尺寸 (图片 + padding)
+        const innerWidth = imgWidth + pL + pR;
+        const innerHeight = imgHeight + pT + pB;
+        
+        // 最外层总尺寸: 内层尺寸 + margin四周
+        const finalWidth = innerWidth + mL + mR;
+        const finalHeight = innerHeight + mT + mB;
+        
+        if (finalWidth <= 0 || finalHeight <= 0) return;
+        
+        // 创建最终画布
+        const canvas = document.createElement('canvas');
+        canvas.width = finalWidth;
+        canvas.height = finalHeight;
+        const ctx = canvas.getContext('2d');
+        
+        // 绘制最外层背景 (margin区域背景)
+        ctx.fillStyle = bgColorValue;
+        // 如果圆角 >0，绘制圆角矩形路径
+        if (radius > 0) {
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(finalWidth - radius, 0);
+            ctx.quadraticCurveTo(finalWidth, 0, finalWidth, radius);
+            ctx.lineTo(finalWidth, finalHeight - radius);
+            ctx.quadraticCurveTo(finalWidth, finalHeight, finalWidth - radius, finalHeight);
+            ctx.lineTo(radius, finalHeight);
+            ctx.quadraticCurveTo(0, finalHeight, 0, finalHeight - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            ctx.fillRect(0, 0, finalWidth, finalHeight);
+        }
+        
+        // 添加阴影效果 (基于整体外围)
+        if (shadowType !== 'none') {
+            ctx.save();
+            ctx.shadowColor = shadowType === 'soft' ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = shadowType === 'soft' ? 12 : 20;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = shadowType === 'soft' ? 4 : 6;
+            // 重新绘制一个略微透明背景来使阴影可见，但避免覆盖原图，重新绘制透明层不合理，实际我们使用之前背景再叠阴影技巧：先绘制背景带阴影，
+            // 因为阴影会基于形状，所以只要再绘制一次作为阴影基底；简单做法是再绘制一个完全相同的背景矩形添加阴影效果而不影响内容图
+            ctx.fillStyle = bgColorValue;
+            if (radius > 0) {
+                ctx.beginPath();
+                ctx.moveTo(radius, 0); /* 省略完整代码效果同在 */
+                ctx.rect(0,0,finalWidth,finalHeight);
+                ctx.fill();
+            } else {
+                ctx.fillRect(0,0,finalWidth,finalHeight);
+            }
+            ctx.restore();
+            // 为防止双重绘制过于深色，重新覆盖一层但保留阴影? 不用太纠结。为了阴影明显但又不能破坏图片，这里改良: 清除之前阴影部分再次绘制背景图。
+            // 简单方法: 重新还原正常背景，去掉阴影重绘底层但阴影会丢失.重新实现稳妥: 绘制两层。
+            // 更干净: 之前的背景已经存在，现在在背后添加阴影；索性我们启用背景后再绘制一层透明阴影方法太复杂，但大众效果足够
+            // 重设一个干净的背景重新用复合方式: 先绘制阴影背景，再绘制图片背景。目前简化: 再绘制蒙层会覆盖，不如重新做！
+        }
+        
+        // 重新绘制一次背景确保阴影不会使图变暗（但其实阴影单独在背景上就够了，但上面已经背景实色，图片不会被阴影覆盖）
+        // 因为阴影是通过 shadow 绘制对象才会产生，我们再次绘制背景会生成阴影，但绘图截止到最终会影响？为了避免图片也被阴影覆盖，我们在绘制图片前取消阴影。
+        // 为了干净，取消现有阴影重新绘制背景最终样式：最好是在绘制图片前重置阴影。
+        // 以下方法: 清空画布，绘制带阴影的背景，再绘制不带阴影的图片区域（完美）。
+        // 为了保证最佳视觉效果，重新渲染一次。
+        ctx.clearRect(0, 0, finalWidth, finalHeight);
+        // 重新绘制背景（带圆角）- 支持透明背景
+        ctx.save();
+        if (shadowType !== 'none' && !transparentBg.checked) {  // 透明背景时阴影无效
+            ctx.shadowColor = shadowType === 'soft' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.35)';
+            ctx.shadowBlur = shadowType === 'soft' ? 12 : 24;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 4;
+        }
+        
+        // 如果不透明或未勾选透明背景，填充颜色；否则跳过填充（保持透明）
+        if (!transparentBg.checked) {
+            ctx.fillStyle = bgColorValue;
+            if (radius > 0) {
+                ctx.beginPath();
+                ctx.roundRect(0, 0, finalWidth, finalHeight, radius);
+                ctx.fill();
+            } else {
+                ctx.fillRect(0, 0, finalWidth, finalHeight);
+            }
+        } else {
+            // 透明背景：只需绘制圆角路径用于阴影（但阴影在透明背景上通常不想要）
+            // 为了效果，什么都不填，保留透明
+            if (radius > 0 && shadowType !== 'none') {
+                // 如果需要阴影同时透明背景，这里可以绘制透明路径，阴影无效，跳过
+            }
+        }
+        ctx.restore();
+        
+        // 重置阴影后再绘制内部图像（图片内容不应该带阴影造成模糊）
+        ctx.shadowColor = 'transparent';
+        // 现在计算图片绘制区域：起始点位置 = marginLeft + paddingLeft, marginTop + paddingTop
+        const imageDrawX = mL + pL;
+        const imageDrawY = mT + pT;
+        
+        // 绘制原始图片
+        ctx.drawImage(originalImageObj, imageDrawX, imageDrawY, imgWidth, imgHeight);
+        
+        // 如果有圆角，需要裁剪超出圆角的图片边缘边缘？但是图片在内部不会超出最外层圆角，因为我们最外层圆角只影响背景，图片区域不会溢出背景外所以没有硬边缘问题
+        // 为了优雅，最终把canvas显示出来
+        resultCanvas.width = finalWidth;
+        resultCanvas.height = finalHeight;
+        const displayCtx = resultCanvas.getContext('2d');
+        displayCtx.drawImage(canvas, 0, 0);
+        
+        // 存储当前生成的完整画布用于保存/复制
+        resultCanvas.fullResCanvas = canvas;
+        statusSpan.innerText = '✨ 已更新';
+        setTimeout(() => {
+            if (imageLoaded) statusSpan.innerText = '✅ 已加载';
+        }, 1200);
+    }
+    
+    // 辅助方法 roundRect
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.moveTo(x+r, y);
+            this.lineTo(x+w-r, y);
+            this.quadraticCurveTo(x+w, y, x+w, y+r);
+            this.lineTo(x+w, y+h-r);
+            this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+            this.lineTo(x+r, y+h);
+            this.quadraticCurveTo(x, y+h, x, y+h-r);
+            this.lineTo(x, y+r);
+            this.quadraticCurveTo(x, y, x+r, y);
+            return this;
+        };
+    }
+    
+    // 保存图片
+    downloadBtn.addEventListener('click', () => {
+        if (!imageLoaded || !resultCanvas.fullResCanvas) {
+            statusSpan.innerText = '❌ 无图片可保存';
+            return;
+        }
+        const finalCanvas = resultCanvas.fullResCanvas;
+        const link = document.createElement('a');
+        const dateStamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+        link.download = `image_border_${dateStamp}.png`;
+        link.href = finalCanvas.toDataURL('image/png');
+        link.click();
+        statusSpan.innerText = '💾 保存成功';
+        setTimeout(() => { if(imageLoaded) statusSpan.innerText = '✅ 已加载'; }, 1500);
+    });
+    
+    // 复制图片到剪贴板
+    copyBtn.addEventListener('click', async () => {
+        if (!imageLoaded || !resultCanvas.fullResCanvas) {
+            statusSpan.innerText = '❌ 无图片可复制';
+            return;
+        }
+        try {
+            const canvas = resultCanvas.fullResCanvas;
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            await navigator.clipboard.write([
+                new ClipboardItem({ [blob.type]: blob })
+            ]);
+            statusSpan.innerText = '📋 复制成功！';
+            setTimeout(() => { if(imageLoaded) statusSpan.innerText = '✅ 已加载'; }, 1500);
+        } catch(err) {
+            statusSpan.innerText = '❌ 复制失败: 权限不足';
+            console.error(err);
+        }
+    });
+    
+    // 初始化示例图片
+    initDefaultPlaceholder();
+</script>
+</body>
+</html>

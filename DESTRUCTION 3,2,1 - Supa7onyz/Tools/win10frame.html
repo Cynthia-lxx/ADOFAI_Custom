@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 10 风格边框生成器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        /* 左侧面板 */
+        .left-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+        
+        .panel-header {
+            background: #2d2d30;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .upload-area {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .upload-box {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-box:hover {
+            border-color: #4a90e2;
+            background: #f5f5f5;
+        }
+        
+        .upload-box.dragover {
+            border-color: #4a90e2;
+            background: #e8f0fe;
+        }
+        
+        .settings-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .setting-group {
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .setting-group h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .setting-row label {
+            min-width: 80px;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .setting-row input, .setting-row select {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .setting-row input[type="color"] {
+            width: 50px;
+            flex: none;
+        }
+        
+        /* 右侧面板 */
+        .right-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+        
+        .preview-header {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .preview-area {
+            flex: 1;
+            padding: 20px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+        
+        .preview-container {
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: inline-block;
+        }
+        
+        .output-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #4a90e2;
+            transition: width 0.3s;
+        }
+        
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #357abd;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .image-info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .left-panel, .right-panel {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 左侧面板 -->
+    <div class="left-panel">
+        <div class="panel-header">🖼️ Windows 10 窗口边框生成器</div>
+        
+        <div class="upload-area">
+            <div id="uploadBox" class="upload-box">
+                📁 点击或拖拽图片到这里<br>
+                <small style="color: #999;">支持 PNG, JPG, JPEG, GIF, BMP</small>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="settings-area">
+            <div class="setting-group">
+                <h4>窗口标题栏设置</h4>
+                <div class="setting-row">
+                    <label>窗口标题:</label>
+                    <input type="text" id="windowTitle" value="我的图片" placeholder="输入窗口标题">
+                </div>
+                <div class="setting-row">
+                    <label>标题栏颜色:</label>
+                    <input type="color" id="titleBarColor" value="#2d2d30">
+                    <span style="font-size:12px; color:#888;">深色主题</span>
+                </div>
+                <div class="setting-row">
+                    <label>文字颜色:</label>
+                    <input type="color" id="titleTextColor" value="#ffffff">
+                </div>
+                <div class="setting-row">
+                    <label>标题栏高度:</label>
+                    <input type="number" id="titleHeight" min="20" max="80" value="32"> 像素
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <h4>窗口边框设置</h4>
+                <div class="setting-row">
+                    <label>边框宽度:</label>
+                    <input type="number" id="borderWidth" min="1" max="10" value="1"> 像素
+                </div>
+                <div class="setting-row">
+                    <label>边框颜色:</label>
+                    <input type="color" id="borderColor" value="#d4d4d4">
+                </div>
+                <div class="setting-row">
+                    <label>圆角大小:</label>
+                    <input type="number" id="borderRadius" min="0" max="20" value="8"> 像素
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <h4>窗口按钮设置</h4>
+                <div class="setting-row">
+                    <label>按钮大小:</label>
+                    <input type="number" id="buttonSize" min="16" max="48" value="28"> 像素
+                </div>
+                <div class="setting-row">
+                    <label>按钮间距:</label>
+                    <input type="number" id="buttonSpacing" min="2" max="20" value="8"> 像素
+                </div>
+                <div class="setting-row">
+                    <label>按钮悬停效果:</label>
+                    <select id="buttonHover">
+                        <option value="true">启用</option>
+                        <option value="false">禁用</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <h4>窗口阴影</h4>
+                <div class="setting-row">
+                    <label>阴影大小:</label>
+                    <input type="number" id="shadowSize" min="0" max="30" value="10"> 像素
+                </div>
+                <div class="setting-row">
+                    <label>阴影透明度:</label>
+                    <input type="range" id="shadowOpacity" min="0" max="100" value="30">
+                    <span id="shadowOpacityValue">30</span>%
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <h4>其他设置</h4>
+                <div class="setting-row">
+                    <input type="checkbox" id="showButtons" checked>
+                    <label>显示控制按钮</label>
+                </div>
+                <div class="setting-row">
+                    <input type="checkbox" id="showWindowIcon" checked>
+                    <label>显示窗口图标</label>
+                </div>
+                <div class="setting-row">
+                    <label>图标样式:</label>
+                    <select id="iconStyle">
+                        <option value="win10">Windows 10 风格</option>
+                        <option value="win11">Windows 11 风格</option>
+                        <option value="simple">简单风格</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 右侧面板 -->
+    <div class="right-panel">
+        <div class="preview-header">
+            📺 实时预览
+            <button id="refreshBtn" style="float: right; padding: 4px 12px; font-size: 12px;">刷新预览</button>
+        </div>
+        <div class="preview-area" id="previewArea">
+            <div class="preview-container" id="previewContainer">
+                <canvas id="previewCanvas" style="display: block;"></canvas>
+            </div>
+        </div>
+        
+        <div class="output-area">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="status" class="status">就绪 - 请上传图片</div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="generateBtn" style="flex: 1;">💾 保存为 PNG</button>
+                <button id="copyBtn" style="flex: 1; background: #6c757d;">📋 复制到剪贴板</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DOM 元素
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewContainer = document.getElementById('previewContainer');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const progressFill = document.getElementById('progressFill');
+    const statusDiv = document.getElementById('status');
+    
+    // 设置输入
+    const windowTitle = document.getElementById('windowTitle');
+    const titleBarColor = document.getElementById('titleBarColor');
+    const titleTextColor = document.getElementById('titleTextColor');
+    const titleHeight = document.getElementById('titleHeight');
+    const borderWidth = document.getElementById('borderWidth');
+    const borderColor = document.getElementById('borderColor');
+    const borderRadius = document.getElementById('borderRadius');
+    const buttonSize = document.getElementById('buttonSize');
+    const buttonSpacing = document.getElementById('buttonSpacing');
+    const buttonHover = document.getElementById('buttonHover');
+    const shadowSize = document.getElementById('shadowSize');
+    const shadowOpacity = document.getElementById('shadowOpacity');
+    const shadowOpacityValue = document.getElementById('shadowOpacityValue');
+    const showButtons = document.getElementById('showButtons');
+    const showWindowIcon = document.getElementById('showWindowIcon');
+    const iconStyle = document.getElementById('iconStyle');
+    
+    // 状态
+    let originalImage = null;
+    let originalWidth = 0;
+    let originalHeight = 0;
+    let isGenerating = false;
+    
+    // 更新阴影透明度显示
+    shadowOpacity.addEventListener('input', () => {
+        shadowOpacityValue.textContent = shadowOpacity.value;
+        updatePreview();
+    });
+    
+    // 所有设置变更时更新预览
+    const settings = [windowTitle, titleBarColor, titleTextColor, titleHeight, borderWidth, borderColor, borderRadius, buttonSize, buttonSpacing, showButtons, showWindowIcon, iconStyle];
+    settings.forEach(setting => {
+        setting.addEventListener('input', () => updatePreview());
+        setting.addEventListener('change', () => updatePreview());
+    });
+    
+    refreshBtn.addEventListener('click', () => updatePreview());
+    
+    // 上传图片
+    uploadBox.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            loadImage(e.target.files[0]);
+        }
+    });
+    
+    // 拖拽上传
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('dragover');
+    });
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            loadImage(e.dataTransfer.files[0]);
+        }
+    });
+    
+    function loadImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                originalImage = img;
+                originalWidth = img.width;
+                originalHeight = img.height;
+                statusDiv.textContent = `已加载: ${file.name} (${originalWidth}x${originalHeight})`;
+                updatePreview();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // 绘制 Windows 10 风格的窗口按钮
+    function drawWindowButton(ctx, x, y, size, type, isHover = false, isPressed = false) {
+        const iconStyleValue = iconStyle.value;
+        const padding = size * 0.25;
+        const lineWidth = Math.max(1, size / 8);
+        
+        ctx.save();
+        ctx.strokeStyle = titleTextColor.value;
+        ctx.fillStyle = titleTextColor.value;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        
+        if (type === 'close') {
+            // 关闭按钮：X
+            if (iconStyleValue === 'win11') {
+                // Win11 风格稍圆润
+                ctx.beginPath();
+                ctx.moveTo(x + padding, y + padding);
+                ctx.lineTo(x + size - padding, y + size - padding);
+                ctx.moveTo(x + size - padding, y + padding);
+                ctx.lineTo(x + padding, y + size - padding);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(x + padding, y + padding);
+                ctx.lineTo(x + size - padding, y + size - padding);
+                ctx.moveTo(x + size - padding, y + padding);
+                ctx.lineTo(x + padding, y + size - padding);
+                ctx.stroke();
+            }
+        } else if (type === 'maximize') {
+            // 最大化按钮：方框
+            ctx.strokeRect(x + padding, y + padding, size - padding * 2, size - padding * 2);
+        } else if (type === 'minimize') {
+            // 最小化按钮：横线
+            ctx.beginPath();
+            ctx.moveTo(x + padding, y + size / 2);
+            ctx.lineTo(x + size - padding, y + size / 2);
+            ctx.stroke();
+        } else if (type === 'restore') {
+            // 还原按钮：两个重叠的方框
+            ctx.strokeRect(x + padding + 2, y + padding - 2, size - padding * 2 - 2, size - padding * 2 - 2);
+            ctx.strokeRect(x + padding, y + padding, size - padding * 2 - 2, size - padding * 2 - 2);
+        }
+        
+        ctx.restore();
+    }
+    
+    // 绘制窗口图标
+    function drawWindowIcon(ctx, x, y, size) {
+        const iconStyleValue = iconStyle.value;
+        const padding = size * 0.2;
+        
+        ctx.save();
+        ctx.fillStyle = titleTextColor.value;
+        
+        if (iconStyleValue === 'win10' || iconStyleValue === 'win11') {
+            // Windows 标志风格
+            const w = size - padding * 2;
+            const h = size - padding * 2;
+            ctx.fillRect(x + padding, y + padding + h * 0.3, w, h * 0.15);
+            ctx.fillRect(x + padding, y + padding + h * 0.5, w, h * 0.15);
+            ctx.fillRect(x + padding, y + padding + h * 0.7, w, h * 0.15);
+            // 左侧竖条
+            ctx.fillRect(x + padding, y + padding, w * 0.2, h);
+        } else {
+            // 简单风格：圆形
+            ctx.beginPath();
+            ctx.arc(x + size/2, y + size/2, size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        ctx.restore();
+    }
+    
+    // 生成带窗口边框的图片
+    async function generateWindowFrame() {
+        return new Promise((resolve) => {
+            if (!originalImage) {
+                resolve(null);
+                return;
+            }
+            
+            setTimeout(() => {
+                try {
+                    const titleH = parseInt(titleHeight.value);
+                    const borderW = parseInt(borderWidth.value);
+                    const radius = parseInt(borderRadius.value);
+                    const btnSize = parseInt(buttonSize.value);
+                    const btnSpacing = parseInt(buttonSpacing.value);
+                    const shadow = parseInt(shadowSize.value);
+                    const shadowAlpha = parseInt(shadowOpacity.value) / 100;
+                    const showBtns = showButtons.checked;
+                    const showIcon = showWindowIcon.checked;
+                    const title = windowTitle.value || " ";
+                    
+                    // 计算最终画布尺寸（包括阴影）
+                    const contentWidth = originalWidth + borderW * 2;
+                    const contentHeight = originalHeight + titleH + borderW;
+                    const canvasWidth = contentWidth + shadow * 2;
+                    const canvasHeight = contentHeight + shadow * 2;
+                    
+                    // 创建画布
+                    const canvas = document.createElement('canvas');
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 绘制阴影
+                    if (shadow > 0 && shadowAlpha > 0) {
+                        ctx.shadowColor = `rgba(0, 0, 0, ${shadowAlpha})`;
+                        ctx.shadowBlur = shadow;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = shadow * 0.5;
+                    }
+                    
+                    // 绘制窗口主体（白色背景）
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = `rgba(0, 0, 0, ${shadowAlpha})`;
+                    ctx.shadowBlur = shadow;
+                    ctx.fillRect(shadow, shadow, contentWidth, contentHeight);
+                    
+                    // 重置阴影用于内部绘制
+                    ctx.shadowColor = 'transparent';
+                    
+                    // 绘制边框
+                    if (borderW > 0) {
+                        ctx.strokeStyle = borderColor.value;
+                        ctx.lineWidth = borderW;
+                        ctx.strokeRect(shadow, shadow, contentWidth, contentHeight);
+                    }
+                    
+                    // 绘制标题栏背景
+                    const titleBarY = shadow;
+                    ctx.fillStyle = titleBarColor.value;
+                    ctx.fillRect(shadow, titleBarY, contentWidth, titleH);
+                    
+                    // 绘制标题栏底部边框
+                    ctx.strokeStyle = borderColor.value;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(shadow, titleBarY + titleH);
+                    ctx.lineTo(shadow + contentWidth, titleBarY + titleH);
+                    ctx.stroke();
+                    
+                    // 绘制窗口图标
+                    let iconX = shadow + 10;
+                    const iconSize = titleH - 8;
+                    if (showIcon) {
+                        drawWindowIcon(ctx, iconX, titleBarY + 4, iconSize);
+                        iconX += iconSize + 8;
+                    }
+                    
+                    // 绘制标题文字
+                    const maxTitleWidth = contentWidth - (showBtns ? (btnSize * 3 + btnSpacing * 2 + 20) : 20) - (iconX - shadow);
+                    ctx.font = `${Math.floor(titleH * 0.6)}px 'Segoe UI', 'Microsoft YaHei'`;
+                    ctx.fillStyle = titleTextColor.value;
+                    ctx.textBaseline = 'middle';
+                    
+                    let displayTitle = title;
+                    let titleWidth = ctx.measureText(displayTitle).width;
+                    if (titleWidth > maxTitleWidth && maxTitleWidth > 50) {
+                        while (titleWidth > maxTitleWidth - 20 && displayTitle.length > 3) {
+                            displayTitle = displayTitle.slice(0, -1);
+                            titleWidth = ctx.measureText(displayTitle + '...').width;
+                        }
+                        displayTitle = displayTitle + '...';
+                    }
+                    ctx.fillText(displayTitle, iconX, titleBarY + titleH / 2);
+                    
+                    // 绘制控制按钮
+                    if (showBtns) {
+                        const btnY = titleBarY + (titleH - btnSize) / 2;
+                        let btnX = shadow + contentWidth - btnSize - 10;
+                        
+                        // 关闭按钮（红色悬停效果）
+                        if (buttonHover.value === 'true') {
+                            ctx.fillStyle = '#e81123';
+                            ctx.fillRect(btnX, btnY, btnSize, btnSize);
+                            ctx.fillStyle = '#ffffff';
+                        }
+                        drawWindowButton(ctx, btnX, btnY, btnSize, 'close');
+                        
+                        btnX -= (btnSize + btnSpacing);
+                        // 最大化按钮
+                        drawWindowButton(ctx, btnX, btnY, btnSize, 'maximize');
+                        
+                        btnX -= (btnSize + btnSpacing);
+                        // 最小化按钮
+                        drawWindowButton(ctx, btnX, btnY, btnSize, 'minimize');
+                    }
+                    
+                    // 绘制圆角（通过覆盖四个角实现）
+                    if (radius > 0) {
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'destination-out';
+                        // 四个角的圆角处理（简化版：用白色覆盖）
+                        ctx.restore();
+                        // 实际使用路径裁剪会更好，这里简化处理
+                    }
+                    
+                    // 绘制原始图片
+                    const imgX = shadow + borderW;
+                    const imgY = shadow + titleH + borderW;
+                    ctx.drawImage(originalImage, imgX, imgY, originalWidth, originalHeight);
+                    
+                    resolve(canvas);
+                } catch (error) {
+                    console.error('生成失败:', error);
+                    resolve(null);
+                }
+            }, 10);
+        });
+    }
+    
+    async function updatePreview() {
+        if (!originalImage) return;
+        
+        const resultCanvas = await generateWindowFrame();
+        if (resultCanvas) {
+            // 缩放预览以适应显示区域
+            const maxWidth = 500;
+            const maxHeight = 400;
+            let displayWidth = resultCanvas.width;
+            let displayHeight = resultCanvas.height;
+            
+            if (displayWidth > maxWidth) {
+                displayHeight = (displayHeight * maxWidth) / displayWidth;
+                displayWidth = maxWidth;
+            }
+            if (displayHeight > maxHeight) {
+                displayWidth = (displayWidth * maxHeight) / displayHeight;
+                displayHeight = maxHeight;
+            }
+            
+            previewCanvas.width = displayWidth;
+            previewCanvas.height = displayHeight;
+            const ctx = previewCanvas.getContext('2d');
+            ctx.drawImage(resultCanvas, 0, 0, displayWidth, displayHeight);
+            
+            // 存储完整画布用于保存
+            previewCanvas.fullCanvas = resultCanvas;
+        }
+    }
+    
+    async function saveImage() {
+        if (!originalImage) {
+            statusDiv.textContent = '错误：请先上传图片';
+            return;
+        }
+        
+        isGenerating = true;
+        generateBtn.disabled = true;
+        progressFill.style.width = '0%';
+        statusDiv.textContent = '正在生成...';
+        
+        try {
+            progressFill.style.width = '50%';
+            const resultCanvas = await generateWindowFrame();
+            progressFill.style.width = '80%';
+            
+            if (resultCanvas) {
+                // 下载图片
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                link.download = `window_frame_${timestamp}.png`;
+                link.href = resultCanvas.toDataURL('image/png');
+                link.click();
+                
+                progressFill.style.width = '100%';
+                statusDiv.textContent = '保存成功！';
+                setTimeout(() => {
+                    statusDiv.textContent = '就绪';
+                    progressFill.style.width = '0%';
+                }, 2000);
+            } else {
+                throw new Error('生成失败');
+            }
+        } catch (error) {
+            statusDiv.textContent = `错误: ${error.message}`;
+            progressFill.style.width = '0%';
+        } finally {
+            isGenerating = false;
+            generateBtn.disabled = false;
+        }
+    }
+    
+    async function copyToClipboard() {
+        if (!originalImage) {
+            statusDiv.textContent = '错误：请先上传图片';
+            return;
+        }
+        
+        try {
+            const resultCanvas = await generateWindowFrame();
+            if (resultCanvas) {
+                resultCanvas.toBlob(async (blob) => {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            [blob.type]: blob
+                        })
+                    ]);
+                    statusDiv.textContent = '已复制到剪贴板！';
+                    setTimeout(() => {
+                        statusDiv.textContent = '就绪';
+                    }, 2000);
+                });
+            }
+        } catch (error) {
+            statusDiv.textContent = `复制失败: ${error.message}`;
+        }
+    }
+    
+    generateBtn.addEventListener('click', saveImage);
+    copyBtn.addEventListener('click', copyToClipboard);
+    
+    // 初始化示例图片
+    function initExample() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(0, 0, 400, 300);
+        ctx.fillStyle = '#4a90e2';
+        ctx.font = 'bold 24px "Segoe UI"';
+        ctx.textAlign = 'center';
+        ctx.fillText('示例图片', 200, 150);
+        ctx.font = '14px "Segoe UI"';
+        ctx.fillStyle = '#666';
+        ctx.fillText('上传你的图片查看效果', 200, 200);
+        
+        const img = new Image();
+        img.onload = () => {
+            originalImage = img;
+            originalWidth = img.width;
+            originalHeight = img.height;
+            updatePreview();
+        };
+        img.src = canvas.toDataURL();
+    }
+    
+    initExample();
+</script>
+</body>
+</html>
