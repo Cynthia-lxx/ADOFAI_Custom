@@ -1,0 +1,44 @@
+0000000000000000000000000000000000000000 6179b40bc2b32b844f420b0f2996d8625eea2b81 Cynthia-lxx <wjz-space@outlook.com> 1790723882 +0800	commit (initial): Initial commit
+6179b40bc2b32b844f420b0f2996d8625eea2b81 25025004926599343c3cc95780956cf4b4f7aa89 Cynthia-lxx <wjz-space@outlook.com> 1790727990 +0800	commit: Add assets with Git LFS tracking
+25025004926599343c3cc95780956cf4b4f7aa89 0000000000000000000000000000000000000000 Cynthia-lxx <wjz-space@outlook.com> 1790728156 +0800	Branch: renamed refs/heads/master to refs/heads/main
+0000000000000000000000000000000000000000 25025004926599343c3cc95780956cf4b4f7aa89 Cynthia-lxx <wjz-space@outlook.com> 1790728156 +0800	Branch: renamed refs/heads/master to refs/heads/main
+25025004926599343c3cc95780956cf4b4f7aa89 e9aae4574be96e7f034af00b2864d1d0fc885b12 Cynthia-lxx <wjz-space@outlook.com> 1790728208 +0800	commit: Update Rrhar'il.webp
+e9aae4574be96e7f034af00b2864d1d0fc885b12 ccac7faa113f14a24cdb0489fd4d675d43beab1d Cynthia-lxx <wjz-space@outlook.com> 1790728573 +0800	commit: eggfix #949-952
+ccac7faa113f14a24cdb0489fd4d675d43beab1d f50126e6448b53dfe3a47f99681925a49d47dcb2 Cynthia-lxx <wjz-space@outlook.com> 1790729022 +0800	commit: eggfix hitsound, tile transparent, offsync
+f50126e6448b53dfe3a47f99681925a49d47dcb2 57450d6e4c77953f186cb292eca8e14dae8c26cd Cynthia-lxx <wjz-space@outlook.com> 1790729781 +0800	commit: 16.43fix repeat effect
+57450d6e4c77953f186cb292eca8e14dae8c26cd b2d92c8c10af38e1984916d8587bf0eb822a801d Cynthia-lxx <wjz-space@outlook.com> 1790732338 +0800	commit: 5-hit for PHASE III
+b2d92c8c10af38e1984916d8587bf0eb822a801d 29fbfcd18fc9efc04730cf9e9d76d3ad97f2e184 Cynthia-lxx <wjz-space@outlook.com> 1790733735 +0800	commit: PHASE III basic effex
+29fbfcd18fc9efc04730cf9e9d76d3ad97f2e184 cc9e127f143cfadcf29da77fe9dc91bcb94f4cad Cynthia-lxx <wjz-space@outlook.com> 1790735401 +0800	commit: PHASE III effex #2
+cc9e127f143cfadcf29da77fe9dc91bcb94f4cad 06739c90249d54b7aa2aaf5387646074f518efd2 Cynthia-lxx <wjz-space@outlook.com> 1790735426 +0800	commit: PHASE III assets
+06739c90249d54b7aa2aaf5387646074f518efd2 ecaa8c62b73aeed096abb0698921dff1a571294c Cynthia-lxx <wjz-space@outlook.com> 1790736965 +0800	commit: PHASE III effex #2
+ecaa8c62b73aeed096abb0698921dff1a571294c abd038fb019c2014fd19b285f77d585f34081ddb Cynthia-lxx <wjz-space@outlook.com> 1790743844 +0800	commit: PHASE III mostly complete
+abd038fb019c2014fd19b285f77d585f34081ddb 826b661e089f1a2fd1d2c08f4e9d5113a04ceadc Cynthia-lxx <wjz-space@outlook.com> 1790747933 +0800	commit: PHASE IV chart
+826b661e089f1a2fd1d2c08f4e9d5113a04ceadc acb468ed1111f335a8472ed7926247576a47baaa Cynthia-lxx <wjz-space@outlook.com> 1790750114 +0800	commit: large int fixed
+acb468ed1111f335a8472ed7926247576a47baaa 30bce24abe7bbfbc08604a370a60985366bc91de Cynthia-lxx <wjz-space@outlook.com> 1790751802 +0800	commit: PHASE IV some vfx
+30bce24abe7bbfbc08604a370a60985366bc91de d2ddc7e437b140d901841224975dda5446305989 Cynthia-lxx <wjz-space@outlook.com> 1790754144 +0800	commit: ps* transparent; tile fixed
+d2ddc7e437b140d901841224975dda5446305989 519960bd2f08db3cf5fa122ea5b0fcb38593ce79 Cynthia-lxx <wjz-space@outlook.com> 1790755602 +0800	commit: PHASE I~IV partial complete
+519960bd2f08db3cf5fa122ea5b0fcb38593ce79 6db8a2ec69dee39106b456d83712e26efc3551a4 Cynthia-lxx <wjz-space@outlook.com> 1790770330 +0800	commit: PHASE V chart
+6db8a2ec69dee39106b456d83712e26efc3551a4 7fc4f75a4b9f5369c4c39abcfd7d692935b6b56b Cynthia-lxx <wjz-space@outlook.com> 1790771515 +0800	commit: PHASE V vfx
+7fc4f75a4b9f5369c4c39abcfd7d692935b6b56b 98e817d0caccaf10f8fddd1fad10d348ef88a5ba Cynthia-lxx <wjz-space@outlook.com> 1790817418 +0800	commit: PHASE VI chart
+98e817d0caccaf10f8fddd1fad10d348ef88a5ba 3cc8a84ed680568eec5b4912e978f2cf3ecbc45d Cynthia-lxx <wjz-space@outlook.com> 1790819455 +0800	commit: PHASE VI vfx #1
+3cc8a84ed680568eec5b4912e978f2cf3ecbc45d bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 Cynthia-lxx <wjz-space@outlook.com> 1790819706 +0800	commit: PHASE VI deco fix
+bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 Cynthia-lxx <wjz-space@outlook.com> 1790823921 +0800	checkout: moving from main to bf5f8b
+bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 Cynthia-lxx <wjz-space@outlook.com> 1790824098 +0800	checkout: moving from bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 to main
+bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 b4be508884c9b6d0e36bda6da660ac70e94ed15d Cynthia-lxx <wjz-space@outlook.com> 1790824140 +0800	commit: broken??
+b4be508884c9b6d0e36bda6da660ac70e94ed15d bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 Cynthia-lxx <wjz-space@outlook.com> 1790824175 +0800	checkout: moving from main to bf5f8b
+bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 b4be508884c9b6d0e36bda6da660ac70e94ed15d Cynthia-lxx <wjz-space@outlook.com> 1790824512 +0800	checkout: moving from bf5f8bc2a34782bff4af5f0cf9adb401665a57b7 to main
+b4be508884c9b6d0e36bda6da660ac70e94ed15d ff855151e0b9a5fa56ee24386b9963cc29515a6a Cynthia-lxx <wjz-space@outlook.com> 1790824659 +0800	commit: omg i fixed that, but not completely
+ff855151e0b9a5fa56ee24386b9963cc29515a6a 38884f34a9bf192bb5f40df862a3eb16900fa9fa Cynthia-lxx <wjz-space@outlook.com> 1790825173 +0800	commit: 现在遇事先保存一下
+38884f34a9bf192bb5f40df862a3eb16900fa9fa 3cccb1c35ee15ffa672b57a8e3a63c422d7d89ca Cynthia-lxx <wjz-space@outlook.com> 1790831236 +0800	commit: PHASE VII chart
+3cccb1c35ee15ffa672b57a8e3a63c422d7d89ca 0867aca468801f3c3e02b6ff06b3800e0be28a21 Cynthia-lxx <wjz-space@outlook.com> 1790831862 +0800	commit: tried PHASE VII vfx but not good
+0867aca468801f3c3e02b6ff06b3800e0be28a21 3cccb1c35ee15ffa672b57a8e3a63c422d7d89ca Cynthia-lxx <wjz-space@outlook.com> 1790831928 +0800	checkout: moving from main to 3cccb1c
+3cccb1c35ee15ffa672b57a8e3a63c422d7d89ca 0867aca468801f3c3e02b6ff06b3800e0be28a21 Cynthia-lxx <wjz-space@outlook.com> 1790831961 +0800	checkout: moving from 3cccb1c35ee15ffa672b57a8e3a63c422d7d89ca to main
+0867aca468801f3c3e02b6ff06b3800e0be28a21 79922799cf2978e9bd523dbc6e94182842c9c6bb Cynthia-lxx <wjz-space@outlook.com> 1790832091 +0800	commit: small ckpt
+79922799cf2978e9bd523dbc6e94182842c9c6bb 9cabb174614306edf8e16bc1dfc868b66238cb98 Cynthia-lxx <wjz-space@outlook.com> 1790832518 +0800	commit: at small ckpt
+9cabb174614306edf8e16bc1dfc868b66238cb98 b6bb69ab4a406eff5b7039dab4ed4513ab94770e Cynthia-lxx <wjz-space@outlook.com> 1790834508 +0800	commit: adv some PHASE VII vfx
+b6bb69ab4a406eff5b7039dab4ed4513ab94770e d42e60f691054bf9df25c20007e6579316b9d5dd Cynthia-lxx <wjz-space@outlook.com> 1790836343 +0800	commit: adv some PHASE VII vfx
+d42e60f691054bf9df25c20007e6579316b9d5dd c6f9eb462ad43242873ae06e7e98811703005bf9 Cynthia-lxx <wjz-space@outlook.com> 1790837068 +0800	commit: mostly complete!!!
+c6f9eb462ad43242873ae06e7e98811703005bf9 0d2cc49d33818861220b0090a47bc9833f744d48 Cynthia-lxx <wjz-space@outlook.com> 1790840076 +0800	commit: v1
+0d2cc49d33818861220b0090a47bc9833f744d48 7fac4cdf20e387d2352f3b248e177c72e37168c3 Cynthia-lxx <wjz-space@outlook.com> 1790842256 +0800	commit: credit
+7fac4cdf20e387d2352f3b248e177c72e37168c3 f8da818f98af84321cb87d882ca95c530891facb Cynthia-lxx <wjz-space@outlook.com> 1790842403 +0800	commit: credit fix
+f8da818f98af84321cb87d882ca95c530891facb 937a75b75059d3f2546b8a6d3fc4a23b070cf844 Cynthia-lxx <wjz-space@outlook.com> 1790857839 +0800	commit: Added cover
